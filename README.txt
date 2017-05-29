@@ -23,10 +23,15 @@ Arduino--macos(GoogleScrip)  Publish > Deploy as web app > macosID,everyone
        --figure print // echo | openssl s_client -connect script.google.com:443 |& openssl x509 -fingerprint -noout
        --Line notify
        
-GoogleScrip--ID googleSheet
+GoogleScrip--https://script.google.com/d/1vzrNZcEM_IEwEpbTOpn0DEi6-JNIZnF5HK-dMwNnzFHYoXtFIBF6Gi2b/edit?usp=drive_web
+           --ID googleSheet
            --Name Sheet1,2 must be match in GoogleSheet
            --LED ColumRow
-GoogleSheet--Name Sheet1,2 must be match in GoogleScrip
+           
+           
+GoogleSheet--https://docs.google.com/spreadsheets/d/1x3DLh6ljvsSObuWCqPWhidLB-abE3eRX5QWUFSSX5VA/edit#gid=0
+           --Name Sheet1,2 must be match in GoogleScrip
            --LED ColumRow
+           
            
            
