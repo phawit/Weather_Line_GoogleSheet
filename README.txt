@@ -11,9 +11,10 @@ Tools
 6.Switch--D5,D4
         --GND
 
-DHT11------------->NodeMCU-->LCD20X4
+DHT11------------->NodeMCU-->LCD20X4 (BackLight On-Off from Switch)
 GoogleSheet(LED)-->       -->LED
 Switch(interrupt)->       -->Line (Every 8,10,12,14,16,21 o'clock)
+                          -->Line (When Rain is Coming!)
                           -->GoogleScrip >> GoogleSheet (every 0,15,30,45 min)
                           
 Edit 
