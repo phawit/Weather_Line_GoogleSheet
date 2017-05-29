@@ -165,8 +165,8 @@ void loop() {
 
   if(n==0){
     if(rain < 930) {  
-      Serial.println("%E2%9B%88%E2%9B%88%E2%9B%88The%20rain%20is%20coming.%E2%9B%88%E2%9B%88%E2%9B%88");
-      Line_Notify("%E2%9B%88%E2%9B%88%E2%9B%88The%20rain%20is%20coming.%E2%9B%88%E2%9B%88%E2%9B%88");
+      Serial.println("Raining");
+      Line_Notify("..%E0%B8%AB%E0%B8%99%E0%B9%88%E0%B8%A7%E0%B8%A2%E0%B8%9D%E0%B8%B6%E0%B8%81%E0%B8%9E%E0%B8%B1%E0%B8%99.%E0%B8%99%E0%B8%A3..%0A%E2%9B%88%E2%9B%88%E2%9B%88It%27s%20raining%20%E2%9B%88%E2%9B%88%E2%9B%88");
       n=1;
       }
   }    
