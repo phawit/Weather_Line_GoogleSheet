@@ -46,7 +46,7 @@ String url = url_x + "?tag=" + String(humid) + "&value=" + String(temp);
 void setup() {
 
   k = 984;
-  p = 1;
+  p = 0;
   n=1;
 
   pinMode(D0, OUTPUT);  //LED
@@ -199,7 +199,7 @@ void loop() {
    int mm = int(newtime->tm_min);
    int ss = int(newtime->tm_sec);
   
-   if(((h==8)||(h==10)||(h==12)||(h==14)||(h==16)||(h==20))&&(mm==00))
+   if(((h==8)||(h==10)||(h==12)||(h==14)||(h==16)||(h==21))&&(mm==00))
      {   
        if(k!= mm){  Line_Notify(message);  k=mm;  }      
      } 
