@@ -215,7 +215,7 @@ void loop() {
  
   HTTPSRedirect client(httpsPort);
   if(!client.connected())
-     client.connect(host, httpsPort);
+    { client.connect(host, httpsPort);  } ///
   
   client.printRedir(url3, host, googleRedirHost);
   
