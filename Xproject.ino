@@ -1,3 +1,26 @@
+/*
+ * Generate Token >> https://notify-bot.line.me/my/
+ * Encode message >> http://meyerweb.com/eric/tools/dencoder/ 
+Tools
+1.NodeMCU V2
+2.DHT22--D3
+3.RainSensor--A0
+4.LCD20x4.SDA--D2
+         .SCL--D1
+         .VCC--5V (only)
+5.LED--D0,GND
+6.TouchSwitch--D5,D4       
+             --3.3V
+             --GND
+
+DHT22------------->NodeMCU-->LCD20X4 (BackLight On-Off from Switch)
+GoogleSheet(LED)-->       -->LED
+Switch(interrupt)->       -->Line (Every 8,10,12,14,16,21 o'clock)
+                          -->Line (When Rain is Coming!)
+                          -->GoogleScrip >> GoogleSheet (every 0,15,30,45 min)
+
+*/
+
 #include <ESP8266WiFi.h>
 #include "HTTPSRedirect.h"
 #include "DHT.h"
@@ -6,11 +29,11 @@
 #include <time.h>
 
 #define DHTPIN D3    
-#define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
-#define LINE_TOKEN "v2yeZTB17hbxcDZ6BHx6xgr2iLGb74UfjeQFrQ59nTo"
+#define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321,DHT11
+#define LINE_TOKEN "v2yeZTB17hbxcDZ6BHx6xgr2iLGb74UfjeQFrQ59nTo"  //ภูมิากาศ = "%E0%B8%A0%E0%B8%B9%E0%B8%A1%E0%B8%B4%E0%B8%AD%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A8%F0%9F%8F%9C"
 
 DHT dht(DHTPIN, DHTTYPE);
-float temp,humid;
+float temp,humid,hic;
 
 void Line_Notify(String message) ;
 String message;
@@ -26,7 +49,6 @@ time_t now = time(nullptr);
 struct tm* newtime = localtime(&now);
 String tmpNow = "";
 
-
 LiquidCrystal_I2C lcd(0x3F, 20, 4);
 
 int timezone = 7;
@@ -34,16 +56,16 @@ char ntp_server1[20] = "ntp.ku.ac.th";
 char ntp_server2[20] = "fw.eng.ku.ac.th";
 char ntp_server3[20] = "time.uni.net.th";
 
-const char* ssid = "MyWifi";  //------------------------------------
-const char* password = "abcd1234";  //------------------------------------------
+const char* ssid = "MyWifi";  //------------------------------------edit
+const char* password = "abcd1234";  //------------------------------------------edit
 
 const char* host = "script.google.com";
 const char* googleRedirHost = "script.googleusercontent.com";
 //https://script.google.com/macros/s/AKfycbz-ZwxNXXVEPBBkHRt_DXb4LDTfQoszbJ28mNS2CSEo6WjCHiY/exec
-const char *GScriptId = "AKfycbz-ZwxNXXVEPBBkHRt_DXb4LDTfQoszbJ28mNS2CSEo6WjCHiY";  //-------------------------------------------
+const char *GScriptId = "AKfycbz-ZwxNXXVEPBBkHRt_DXb4LDTfQoszbJ28mNS2CSEo6WjCHiY";  //-------------------------------------------edit
 const int httpsPort = 443;
 // echo | openssl s_client -connect script.google.com:443 |& openssl x509 -fingerprint -noout
-const char* fingerprint = "D1 58 71 3D 71 54 34 86 50 2A DF FE 2C 74 85 50 82 20 95 C3";  //--------------------------------------------------------
+const char* fingerprint = "D1 58 71 3D 71 54 34 86 50 2A DF FE 2C 74 85 50 82 20 95 C3";  //--------------------------------------------------------edit
 //String url_x = String("/macros/s/") + GScriptId + "/exec?value=Hello";
 String url_x = String("/macros/s/") + GScriptId + "/exec";
 String url3 = String("/macros/s/") + GScriptId + "/exec?read";
@@ -60,14 +82,13 @@ void setup() {
   pinMode(D0, OUTPUT);  //LED
   pinMode(2, INPUT);  //Switch
   pinMode(14, INPUT);  //Switch 
+  
   attachInterrupt(2, doIn2,RISING);
   attachInterrupt(14, doIn14,FALLING);
 
   lcd.begin();
   lcd.backlight();
-  
-  
-   
+     
   Serial.begin(115200);
   Serial.println();
   Serial.print("Connecting to wifi: ");
@@ -125,15 +146,14 @@ void setup() {
 
   Serial.println("==============================================================================");
     
-  lcd.clear();
+  delay(500);
   lcd.noBacklight();
-  
+  lcd.clear();
  
 }
 
 void loop() {
-  lcd.noBacklight();
-  
+   
   calTemp();
 
 //********---Cal_Flag_Train_rest---***************************  
@@ -152,19 +172,19 @@ void loop() {
   String Rain = "%E2%9B%88";
   String Br = "%F0%9F%94%86";
   
-  if(temp < 27){      flag = White;  fla = "White";   water = "1/2"; train = 50; rest = 10; }
-  else if(temp < 33){ flag = Green;  fla = "Green";   water = "1/2"; train = 50; rest = 10; }
-  else if(temp < 40){ flag = Yellow; fla = "Yellow";  water = "1";   train = 45; rest = 15; }
-  else if(temp < 52){ flag = Red;    fla = "Red";     water = "1";   train = 30; rest = 30; }
+  if(hic < 27){       flag = White;  fla = "White";   water = "1/2"; train = 60; rest = 0; }
+  else if(hic <= 32){ flag = Green;  fla = "Green";   water = "1/2"; train = 50; rest = 10; }
+  else if(hic <= 39){ flag = Yellow; fla = "Yellow";  water = "1";   train = 45; rest = 15; }
+  else if(hic <= 51){ flag = Red;    fla = "Red";     water = "1";   train = 30; rest = 30; }
   else {              flag = Black;  fla = "Black";   water = "1";   train = 20; rest = 40; }
  
 //*************---LCD---***************************************************************
 
   lcd.clear();
   Serial.println(NowString() + " "+ NowString2());    lcd.setCursor(0, 0); lcd.print(NowString2() + " " + NowString());
-  Serial.println("Temp : ");  Serial.println(temp);   lcd.setCursor(0, 1); lcd.print("Temp  : "); lcd.print(temp);
-  Serial.println("Humid : "); Serial.println(humid);  lcd.setCursor(0, 2); lcd.print("Humid : "); lcd.print(humid); 
-  Serial.println("Flag : ");  Serial.println(fla);    lcd.setCursor(0, 3); lcd.print("Flag  : "); lcd.print(fla);
+  Serial.println("Temp : ");  Serial.print(temp);   lcd.setCursor(0, 1); lcd.print("Temp  : "); lcd.print(temp);
+  Serial.print("\tHumid : "); Serial.print(humid);  lcd.setCursor(0, 2); lcd.print("Humid : "); lcd.print(humid); 
+  Serial.print("\tFlag : ");  Serial.print(fla);    lcd.setCursor(0, 3); lcd.print("Flag  : "); lcd.print(fla);
   
 //********---Rain---****************************************************************************
 
@@ -172,7 +192,7 @@ void loop() {
   if(rain < 900) { sta = Rain; }
   
   rain = analogRead(A0);
-  Serial.println("Rain : ");  Serial.println(rain); 
+  Serial.println("\tRain : ");  Serial.print(rain); 
 
   if(n==0){
     if(rain < 930) {  
@@ -183,16 +203,23 @@ void loop() {
   }    
      
 //********--LINE--**************************************************************************** 
-
-    message = "%E0%B8%AB%E0%B8%99%E0%B9%88%E0%B8%A7%E0%B8%A2%E0%B8%9D%E0%B8%B6%E0%B8%81%E0%B8%9E%E0%B8%B1%E0%B8%99.%E0%B8%99%E0%B8%A3." + sta +'\n'+
+    
+    String messageA = "%E0%B8%AB%E0%B8%99%E0%B9%88%E0%B8%A7%E0%B8%A2%E0%B8%9D%E0%B8%B6%E0%B8%81%E0%B8%97%E0%B8%AB%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88%E0%B8%9E%E0%B8%B1%E0%B8%99.%E0%B8%99%E0%B8%A3.%E0%B8%A3%E0%B8%A3.%E0%B8%AA." + 
+               sta +'\n'+
                NowString2() + NowString() + day +
               "\n" + x + "%E0%B8%AA%E0%B8%B1%E0%B8%8D%E0%B8%8D%E0%B8%B2%E0%B8%93%E0%B8%98%E0%B8%87%3A%20" + flag +
               "\n" + x + "%E0%B8%AD%E0%B8%B8%E0%B8%93%E0%B8%AB%E0%B8%A0%E0%B8%B9%E0%B8%A1%E0%B8%B4%3A%20" + temp + "%20%C2%B0C" +
               "\n" + x + "%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%8A%E0%B8%B7%E0%B9%89%E0%B8%99%E0%B8%AA%E0%B8%B1%E0%B8%A1%E0%B8%9E%E0%B8%B1%E0%B8%97%E0%B8%98%E0%B9%8C%3A%20" + humid + "%20%25" +
-              "\n" + x + "%E0%B8%9B%E0%B8%A3%E0%B8%B4%E0%B8%A1%E0%B8%B2%E0%B8%93%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B8%94%E0%B8%B7%E0%B9%88%E0%B8%A1%3A%20" + water + "%20%E0%B8%A5%E0%B8%B4%E0%B8%95%E0%B8%A3%2F%E0%B8%8A%E0%B8%A1." +
-              "\n" + x + "%E0%B9%81%E0%B8%99%E0%B8%B0%E0%B8%99%E0%B8%B3%E0%B9%83%E0%B8%AB%E0%B9%89%E0%B8%9D%E0%B8%B6%E0%B8%81%3A%20" + train + "%20%E0%B8%99%E0%B8%B2%E0%B8%97%E0%B8%B5" "  " + 
-              "\n   " + "%20%20%E0%B8%9E%E0%B8%B1%E0%B8%81%3A%20" +rest + "%20%E0%B8%99%E0%B8%B2%E0%B8%97%E0%B8%B5";
-
+              "\n" + x + "%E0%B8%9B%E0%B8%A3%E0%B8%B4%E0%B8%A1%E0%B8%B2%E0%B8%93%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B8%94%E0%B8%B7%E0%B9%88%E0%B8%A1%3A%20" + water + "%20%E0%B8%A5%E0%B8%B4%E0%B8%95%E0%B8%A3%2F%E0%B8%8A%E0%B8%A1.";
+    String messageB;
+    if(fla == "White"){  messageB = "\n" + x + "%E0%B8%9D%E0%B8%B6%E0%B8%81%E0%B9%84%E0%B8%94%E0%B9%89%E0%B8%95%E0%B9%88%E0%B8%AD%E0%B9%80%E0%B8%99%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%87";  }
+    else{
+      messageB = "\n" + x + "%E0%B9%81%E0%B8%99%E0%B8%B0%E0%B8%99%E0%B8%B3%E0%B9%83%E0%B8%AB%E0%B9%89%E0%B8%9D%E0%B8%B6%E0%B8%81%3A%20" + train + "%20%E0%B8%99%E0%B8%B2%E0%B8%97%E0%B8%B5" "  " + 
+                 "\n   " + "%20%20%E0%B8%9E%E0%B8%B1%E0%B8%81%3A%20" + rest + "%20%E0%B8%99%E0%B8%B2%E0%B8%97%E0%B8%B5";
+    }
+    
+    message = messageA + messageB;
+    
        
 //       message = "100student" + sta +'\n'+
 //               NowString2() + NowString() + day +
@@ -207,23 +234,21 @@ void loop() {
    int mm = int(newtime->tm_min);
    int ss = int(newtime->tm_sec);
   
-   if(((h==8)||(h==10)||(h==12)||(h==14)||(h==16)||(h==21))&&(mm==00))
+   if(((h==8)||(h==10)||(h==12)||(h==14)||(h==16)||(h==21))&&(mm==0))
      {   
-       if(k!= mm){  Line_Notify(message);  k=mm;  }      
+       if(k!= mm){  Line_Notify(message);  Serial.println("Line_Notify");  k=mm;  }      
      } 
-     //Serial.print("k1 : ");   Serial.print(k);        
-
+             
    if(mm==5){ k=23; }  
 
-   Serial.println("Line_Notify");
-
+   
 //*******---Google---*******************************************************************************
 
   String url = url_x + "?tag=" + String(humid) + "&value=" + String(temp) + "&rain=" + String(rain);
  
   HTTPSRedirect client(httpsPort);
   if(!client.connected())
-    { client.connect(host, httpsPort);  } ///
+    { client.connect(host, httpsPort);  } 
   
   client.printRedir(url3, host, googleRedirHost);
   
@@ -236,11 +261,6 @@ void loop() {
        p=1;
     }   
   }  
-
-
-
-  
-  delay(6000);
 
   
 }
@@ -324,37 +344,30 @@ void doIn2()
   
 }
 
+
 void doIn14()
 { 
   Serial.println("interrupt14,,,,,");
-  //lcd.backlight(); 
+  lcd.noBacklight(); 
    
 }
 
 void calTemp(){
+  
   float humidX = dht.readHumidity();
   float tempX = dht.readTemperature();
   
   
   if (isnan(humidX) || isnan(tempX)) {
     Serial.println("Failed to read from DHT sensor!");    
-    //return;
+    
   }
   else{
     humid = humidX;
     temp = tempX;
   }
-  /* humid = dht.readHumidity();
-  temp = dht.readTemperature();
   
-  
-  if (isnan(humid) || isnan(temp)) {
-    Serial.println("Failed to read from DHT sensor!");
-    return;
-  }
-  */
-  
-  float hic = dht.computeHeatIndex(temp, humid, false);
+  hic = dht.computeHeatIndex(temp, humid, false);
 
   Serial.print("Humidity: ");
   Serial.print(humid);
@@ -368,4 +381,5 @@ void calTemp(){
   Serial.print(" %\n");
 
 }
+
 
