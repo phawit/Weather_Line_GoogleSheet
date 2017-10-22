@@ -1,6 +1,6 @@
 /*
- * Generate Token >> https://notify-bot.line.me/my/
- * Encode message >> http://meyerweb.com/eric/tools/dencoder/ 
+ * https://notify-bot.line.me/my/ 
+ * http://meyerweb.com/eric/tools/dencoder/ 
 Tools
 1.NodeMCU V2
 2.DHT22--D3
@@ -181,10 +181,10 @@ void loop() {
 //*************---LCD---***************************************************************
 
   lcd.clear();
-  Serial.println(NowString() + " "+ NowString2());    lcd.setCursor(0, 0); lcd.print(NowString2() + " " + NowString());
-  Serial.println("Temp : ");  Serial.print(temp);   lcd.setCursor(0, 1); lcd.print("Temp  : "); lcd.print(temp);
-  Serial.print("\tHumid : "); Serial.print(humid);  lcd.setCursor(0, 2); lcd.print("Humid : "); lcd.print(humid); 
-  Serial.print("\tFlag : ");  Serial.print(fla);    lcd.setCursor(0, 3); lcd.print("Flag  : "); lcd.print(fla);
+  Serial.println(NowString() + " "+ NowString2()); lcd.setCursor(0, 0); lcd.print(NowString2() + " " + NowString());
+  Serial.print("Temp: ");    Serial.print(temp);   lcd.setCursor(0, 1); lcd.print("Temp  : "); lcd.print(temp);
+  Serial.print("\tHumid: "); Serial.print(humid);  lcd.setCursor(0, 2); lcd.print("Humid : "); lcd.print(humid); 
+  Serial.print("\tFlag: ");  Serial.print(fla);    lcd.setCursor(0, 3); lcd.print("Flag  : "); lcd.print(fla);
   
 //********---Rain---****************************************************************************
 
@@ -192,7 +192,7 @@ void loop() {
   if(rain < 900) { sta = Rain; }
   
   rain = analogRead(A0);
-  Serial.println("\tRain : ");  Serial.print(rain); 
+  Serial.print("\tRain: ");  Serial.println(rain); 
 
   if(n==0){
     if(rain < 930) {  
