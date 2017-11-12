@@ -1,0 +1,68 @@
+//**********esp8266
+void setup() {
+  Serial.begin(9600); // set up Serial library at 9600 bps
+  //Serial.println("xxxxxxxxxxxSent");
+}
+
+void loop() {
+  Serial.println("Sw");
+  delay(500);
+  Serial.println("Sr");
+  delay(500);
+  Serial.println("Sb");
+  delay(500);
+  Serial.println("Sg");
+  delay(500);
+}
+
+
+
+
+//****************Arduino****************
+#include <SoftwareSerial.h>
+SoftwareSerial ESPserial(0, 1); // RX | TX
+int i=0;
+void setup() 
+{
+    Serial.begin(9600);     
+    ESPserial.begin(9600);  
+ 
+}
+ 
+void loop() 
+{
+    
+    if( ESPserial.available()){
+      
+      char a = ESPserial.read();
+      
+      if(i==1){
+        //Serial.println("before s");
+        Serial.println(a);
+        i=0;
+        
+        if(a == 'w'){
+          Serial.println("set flag to white");
+        }
+        if(a == 'y'){
+          Serial.println("set flag to yellow");
+        }
+        if(a == 'g'){
+          Serial.println("set flag to green");
+        }
+        if(a == 'r'){
+          Serial.println("set flag to red");
+        }
+        if(a == 'b'){
+          Serial.println("set flag to blue");
+        }
+
+        
+      }
+      if(a=='S'){        
+        i=1;
+      }      
+      
+      }
+     
+}
